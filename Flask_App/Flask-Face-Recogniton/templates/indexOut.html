@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>FaceMark</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <link href="{{ url_for('static',filename='styles/style.css') }}" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+    <div id="navigation">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">FaceMark</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="{{ url_for('punchin') }}">Punch In</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active"  href="{{ url_for('punchout') }}">Punch Out</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <div id="stream">
+      <img class="stream-view" src="{{ url_for('videoout') }}" width="50%"/>
+    </div>
+    
+    <div id="alerts">
+      
+      <script>
+
+          var source = new EventSource("{{ url_for('sse.stream') }}");
+          source.addEventListener('publish', function(event) {
+              var data = JSON.parse(event.data);
+              console.log("The server says " + data.message);
+              var div = document.getElementById("status");
+              div.innerHTML = data.message;
+              if(data.status_code == 1){
+                div.className = "alert-box alert alert-success";
+              }else{
+                div.className = "alert-box alert alert-danger";
+              }
+              setTimeout(function(){
+                div.className = "alert-box alert alert-secondary";
+                div.innerHTML = "Please show your face to the camera to punch out";
+              }, 10000);
+
+          }, false);
+          source.addEventListener('error', function(event) {
+              console.log("Error"+ event)
+          }, false);
+
+      </script>
+
+      <div  id="status" class="alert-box alert alert-secondary" role="alert">
+        Please show your face to the camera to punch out
+      </div>  
+    </div>
+            
+    </body>
+
+
+</html>
